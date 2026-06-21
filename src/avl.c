@@ -6,8 +6,8 @@ ArvoreAVL *criar_arvore() {
 	return arvore;
 }
 
-Nodo *criar_nodo(Nodo *pai, int chave) {
-	No* no = malloc(sizeof(No));
+NoAVL *criar_nodo(NoAVL *pai, int chave) {
+	NoAVL *no = malloc(sizeof(NoAVL));
     no->chave = chave;
     no->pai = pai;
     no->esquerda = NULL;
@@ -16,7 +16,7 @@ Nodo *criar_nodo(Nodo *pai, int chave) {
     return no;	
 }
 
-int altura(Nodo* no){
+int altura(NoAVL* no){
 	int esquerda, direita = 0;
 
 	if(no->esquerda)
@@ -27,7 +27,7 @@ int altura(Nodo* no){
 	return (esquerda > direita) ? esquerda : direita;
 }
 
-int fb(Nodo *no) {
+int fb(NoAVL *no) {
 	int esquerda = 0, direita = 0;
 	
 	if(no->esquerda)
@@ -38,9 +38,9 @@ int fb(Nodo *no) {
 	return (esquerda - direita);
 }
 
-Nodo *rse(Nodo *no) {
-	No *pai = no->pai;
-	No *direita = no->direita;
+NoAVL *rse(NoAVL *no) {
+	NoAVL *pai = no->pai;
+	NoAVL *direita = no->direita;
 
 	no->direita = direita->esquerda;
 	no->pai = direita;
@@ -51,9 +51,9 @@ Nodo *rse(Nodo *no) {
 	return direita;
 }
 
-Nodo *rsd(Nodo *no) {
-	No *pai = no->pai;
-	No *esquerda = no->esquerda;
+NoAVL *rsd(NoAVL *no) {
+	NoAVL *pai = no->pai;
+	NoAVL *esquerda = no->esquerda;
 
 	no->direita = esquerda->direita;
 	no->pai = esquerda;
@@ -64,20 +64,33 @@ Nodo *rsd(Nodo *no) {
 	return esquerda;
 }
 
-Nodo *rde(Nodo* no) {
+NoAVL *rde(NoAVL* no) {
 	no->direita = rsd(no->direita);
 	return rse(no);
 }
 
-Nodo *rds(Nodo* no) {
+NoAVL *rds(NoAVL* no) {
 	no->esquerda = rsd(no->esquerda);
 	return rsd(no);
 }
 
-Nodo *adicionar_no(Nodo *no, int chave) {
+NoAVL *adicionar_no(NoAVL *no, int chave, int *comparacoes) {
+	(*comparacoes)++;
 	if(chave > no->chave) {
+		(*comparacoes)++;
 		if(!no->direita) {
-			
-		}
+			NoAVL *novo = criar_nodo(no, chave);
+			no->direita = novo;
+			return novo;
+		} else
+			return adicionar_no(no->direita, chave, comparacoes);
+	} else {
+		(*comparacoes)++;
+		if(!no->esquerda) {
+			NoAVL *novo = criar_nodo(no, chave);
+			no->esquerda= novo;
+			return novo;
+		} else
+			return adicionar_no(no->esquerda, chave, comparacoes);
 	}
 }
