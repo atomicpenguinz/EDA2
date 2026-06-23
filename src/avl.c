@@ -1,96 +1,165 @@
-#include "header.h"
+#include "avl.h"
 
 ArvoreAVL *criar_arvore() {
 	ArvoreAVL *arvore = malloc(sizeof(ArvoreAVL));
+	if(!arvore) return NULL;
+
 	arvore->raiz = NULL;
+	arvore->comparacoes = 0;
 	return arvore;
 }
 
 NoAVL *criar_nodo(NoAVL *pai, int chave) {
 	NoAVL *no = malloc(sizeof(NoAVL));
+	if(!no) return NULL;
     no->chave = chave;
     no->pai = pai;
     no->esquerda = NULL;
     no->direita = NULL;
-
+	no->altura = 1;
     return no;	
 }
+static inline int max(int x, int y) { return x > y ? x : y;}
 
 int altura(NoAVL* no){
-	int esquerda, direita = 0;
+	return no != NULL ? no->altura : 0;
+}
 
-	if(no->esquerda)
-		esquerda = altura(no->esquerda) + 1;
-	if(no->direita)
-		direita = altura(no->direita) + 1;
-
-	return (esquerda > direita) ? esquerda : direita;
+void att_altura(NoAVL *no) {
+	no->altura = 1 + max(altura(no->esquerda), altura(no->direita));
 }
 
 int fb(NoAVL *no) {
-	int esquerda = 0, direita = 0;
-	
-	if(no->esquerda)
-		esquerda = altura(no->esquerda) + 1;
-	if(no->direita)
-		direita = altura(no->direita) + 1;	
-
-	return (esquerda - direita);
+	return altura(no->esquerda) - altura(no->direita);
 }
 
-NoAVL *rse(NoAVL *no) {
+NoAVL *rse(ArvoreAVL *arvore, NoAVL *no) {
 	NoAVL *pai = no->pai;
 	NoAVL *direita = no->direita;
+	
+	// arvore->comparacoes++;
+	if(direita->esquerda)
+		direita->esquerda->pai = no;
 
 	no->direita = direita->esquerda;
 	no->pai = direita;
-
 	direita->esquerda = no;
 	direita->pai = pai;
 
+	// arvore->comparacoes++;
+	if(!pai)
+		arvore->raiz = direita;
+	else {
+		arvore->comparacoes++;
+		if(pai->esquerda == no)
+			pai->esquerda = direita;
+		else
+			pai->direita = direita;
+	}
+	att_altura(no);
+	att_altura(direita);
 	return direita;
 }
 
-NoAVL *rsd(NoAVL *no) {
+NoAVL *rsd(ArvoreAVL *arvore, NoAVL *no) {
 	NoAVL *pai = no->pai;
 	NoAVL *esquerda = no->esquerda;
 
-	no->direita = esquerda->direita;
+	// arvore->comparacoes++;
+	if(esquerda->direita != NULL)
+		esquerda->direita->pai = no;
+
+	no->esquerda = esquerda->direita;
 	no->pai = esquerda;
 
+	// arvore->comparacoes++;
+	if(!pai)
+		arvore->raiz = esquerda;
+	else {
+		arvore->comparacoes++;
+		if(pai->esquerda == no)
+			pai->esquerda = esquerda;
+		else
+			pai->direita = esquerda;
+	}
 	esquerda->direita = no;
 	esquerda->pai = pai;
-
+	att_altura(no);
+	att_altura(esquerda);
 	return esquerda;
 }
 
-NoAVL *rde(NoAVL* no) {
-	no->direita = rsd(no->direita);
-	return rse(no);
+NoAVL *rde(ArvoreAVL *arvore, NoAVL* no) {
+	no->direita = rsd(arvore, no->direita);
+	return rse(arvore, no);
 }
 
-NoAVL *rds(NoAVL* no) {
-	no->esquerda = rsd(no->esquerda);
-	return rsd(no);
+NoAVL *rdd(ArvoreAVL *arvore, NoAVL* no) {
+	no->esquerda = rse(arvore, no->esquerda);
+	return rsd(arvore, no);
 }
 
-NoAVL *adicionar_no(NoAVL *no, int chave, int *comparacoes) {
-	(*comparacoes)++;
+NoAVL *adicionar_no(ArvoreAVL *arvore, NoAVL *no, int chave) {
+	arvore->comparacoes++;
 	if(chave > no->chave) {
-		(*comparacoes)++;
+		// arvore->comparacoes++;
 		if(!no->direita) {
-			NoAVL *novo = criar_nodo(no, chave);
-			no->direita = novo;
-			return novo;
-		} else
-			return adicionar_no(no->direita, chave, comparacoes);
+			no->direita = criar_nodo(no, chave);
+		} else {
+			no->direita = adicionar_no(arvore, no->direita, chave);
+		}
 	} else {
-		(*comparacoes)++;
+		// arvore->comparacoes++;
 		if(!no->esquerda) {
-			NoAVL *novo = criar_nodo(no, chave);
-			no->esquerda= novo;
-			return novo;
-		} else
-			return adicionar_no(no->esquerda, chave, comparacoes);
+			no->esquerda = criar_nodo(no, chave);
+		} else {
+			no->esquerda = adicionar_no(arvore, no->esquerda, chave);
+		}
 	}
+	att_altura(no);
+	return no;
+}
+
+void balanceamento(ArvoreAVL *arvore, NoAVL *no) {
+	for(; no != NULL; no = no->pai) {
+		int fator = fb(no);
+
+		arvore->comparacoes++;
+		if(fator > 1) {
+			arvore->comparacoes++;
+			if(fb(no->esquerda) > 0) {
+				rsd(arvore, no);
+			} else {
+				rdd(arvore, no);
+			}
+		} else {
+			arvore->comparacoes++;
+			if(fator < -1) {
+				arvore->comparacoes++;
+				if(fb(no->direita) < 0) {
+					rse(arvore, no);
+				} else {
+					rde(arvore, no);
+				}
+			}
+		}
+	}
+}
+#define VAZIA(arvore) (arvore->raiz == NULL)
+
+NoAVL *inserir(ArvoreAVL *arvore, int valor) {
+	arvore->comparacoes++;
+	if(VAZIA(arvore)) {
+		NoAVL *novo = criar_nodo(NULL, valor);
+		arvore->raiz = novo;
+		return novo;
+	}
+	NoAVL *no = adicionar_no(arvore, arvore->raiz, valor);
+	balanceamento(arvore, no);
+	NoAVL *aux = no;
+	return no;
+}
+
+NoAVL *remover(ArvoreAVL *arvore, int valor) {
+	
 }
