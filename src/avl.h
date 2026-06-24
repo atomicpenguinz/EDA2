@@ -28,4 +28,5 @@ NoAVL *rdd(ArvoreAVL *arvore, NoAVL *no);
 NoAVL *adicionar_no(ArvoreAVL *arvore, NoAVL *no, int chave);
 void balanceamento(ArvoreAVL *arvore, NoAVL *no);
 NoAVL *inserir(ArvoreAVL *arvore, int valor);
-NoAVL *remover(ArvoreAVL *arvore, int valor);
+NoAVL *localizar(ArvoreAVL *arvore, NoAVL *no, int valor);
+NoAVL *remover(ArvoreAVL *arvore, int chave);
