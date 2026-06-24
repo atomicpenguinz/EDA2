@@ -1,22 +1,30 @@
 set title 'Comparação'
-set xlabel 'Tamanho da entrada'
-set ylabel 'Número de comparações'
+set xlabel 'Tamanho do conjunto'
+set ylabel 'Esforço computacional'
 set datafile separator ','
 set grid
 set key left top
 set border lw 1.5
 set terminal pngcairo size 1200,800
-# set logscale xy
-set key autotitle columnhead # caso tenha primeira linha com descrição
+set key autotitle columnhead
 
-if (!exists("ARQ")) ARQ = "../src/insercao.csv"
-if (!exists("OUT")) OUT = "grafico_insercao.png"
+LOG = 0
+if(LOG) set logscale xy
 
-set output OUT
+arquivos = "../src/insercao.csv ../src/remocao.csv"
+saidas = "insercao.png remocao.png"
+titulos = "Inserção Remoção"
 
-plot ARQ using 1:2 with linespoints lw 2 title 'AVL', \
-    '' using 1:3 with linespoints lw 2 title 'Rubro-negra', \
-    '' using 1:4 with linespoints lw 2 title 'B (ordem 1)', \
-    '' using 1:5 with linespoints lw 2 title 'B (ordem 5)', \
-    '' using 1:6 with linespoints lw 2 title 'B (ordem 10)'
+do for [i=1:words(arquivos)] {
+    # set title word(titulos, i)
+    arq = word(arquivos, i)
+    out = "grafico_" . word(saidas, i)
 
+    set output out
+
+    plot arq using 1:2 with linespoints lw 2 title 'AVL', \
+        '' using 1:3 with linespoints lw 2 title 'Rubro-negra', \
+        '' using 1:4 with linespoints lw 2 title 'B (ordem 1)', \
+        '' using 1:5 with linespoints lw 2 title 'B (ordem 5)', \
+        '' using 1:6 with linespoints lw 2 title 'B (ordem 10)'
+}
