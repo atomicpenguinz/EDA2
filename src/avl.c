@@ -71,6 +71,8 @@ NoAVL *rsd(ArvoreAVL *arvore, NoAVL *no) {
 
 	no->esquerda = esquerda->direita;
 	no->pai = esquerda;
+	esquerda->direita = no;
+	esquerda->pai = pai;
 
 	// arvore->comparacoes++;
 	if(!pai)
@@ -82,8 +84,6 @@ NoAVL *rsd(ArvoreAVL *arvore, NoAVL *no) {
 		else
 			pai->direita = esquerda;
 	}
-	esquerda->direita = no;
-	esquerda->pai = pai;
 	att_altura(no);
 	att_altura(esquerda);
 	return esquerda;
@@ -100,24 +100,31 @@ NoAVL *rdd(ArvoreAVL *arvore, NoAVL* no) {
 }
 
 NoAVL *adicionar_no(ArvoreAVL *arvore, NoAVL *no, int chave) {
+	if(!no) return NULL;
+
 	arvore->comparacoes++;
 	if(chave > no->chave) {
 		// arvore->comparacoes++;
 		if(!no->direita) {
 			no->direita = criar_nodo(no, chave);
+			att_altura(no);
+			return no->direita;
 		} else {
-			no->direita = adicionar_no(arvore, no->direita, chave);
+			NoAVL *novo = adicionar_no(arvore, no->direita, chave);
+			att_altura(no);
+			return novo;
 		}
 	} else {
-		// arvore->comparacoes++;
 		if(!no->esquerda) {
 			no->esquerda = criar_nodo(no, chave);
+			att_altura(no);
+			return no->esquerda;
 		} else {
-			no->esquerda = adicionar_no(arvore, no->esquerda, chave);
-		}
+			NoAVL *novo = adicionar_no(arvore, no->esquerda, chave);
+			att_altura(no);
+			return novo;
+			}
 	}
-	att_altura(no);
-	return no;
 }
 
 void balanceamento(ArvoreAVL *arvore, NoAVL *no) {
@@ -155,11 +162,100 @@ NoAVL *inserir(ArvoreAVL *arvore, int valor) {
 		return novo;
 	}
 	NoAVL *no = adicionar_no(arvore, arvore->raiz, valor);
-	balanceamento(arvore, no);
-	NoAVL *aux = no;
+	if(no)
+		balanceamento(arvore, no);
 	return no;
 }
 
-NoAVL *remover(ArvoreAVL *arvore, int valor) {
-	
+NoAVL* localizar(ArvoreAVL *arvore, NoAVL* no, int valor) {
+	if(!no) return NULL;
+
+	arvore->comparacoes++;
+    if (no->chave == valor) {
+        return no;
+    } else {
+		arvore->comparacoes++;
+        if(valor < no->chave)
+            return localizar(arvore, no->esquerda, valor);
+        else
+            return localizar(arvore, no->direita, valor);
+    }
+    return NULL;
+}
+
+static NoAVL *menor_no(NoAVL *no) {
+	if(!no) return NULL;
+	NoAVL *aux = no;
+	while(aux->esquerda)
+		aux = aux->esquerda;
+	return aux;
+}
+
+static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
+	if(!raiz) return NULL;
+
+	arvore->comparacoes++;
+	if(chave < raiz->chave)
+		raiz->esquerda= remover_aux(raiz->esquerda, chave, arvore);
+	else if (chave > raiz->chave) {
+		arvore->comparacoes++;
+		raiz->direita = remover_aux(raiz->direita, chave, arvore);
+	} else {
+		arvore->comparacoes++;
+		if(!raiz->esquerda || !raiz->direita) {
+			NoAVL *aux = raiz->esquerda ? raiz->esquerda : raiz->direita;
+			if(!aux) {
+				aux = raiz;
+				raiz = NULL;
+			} else {
+				NoAVL *pai = raiz->pai;
+				*raiz = *aux;
+				raiz->pai = pai;
+				if(raiz->esquerda)
+					raiz->esquerda->pai = raiz;
+				if(raiz->direita)
+					raiz->direita->pai = raiz;
+			}
+			free(aux);
+		} else {
+			NoAVL *aux = menor_no(raiz->direita);
+			raiz->chave = aux->chave;
+			raiz->direita = remover_aux(raiz->direita, aux->chave, arvore);
+		}
+	}
+	if(!raiz) return NULL;
+
+	raiz->altura = 1 + max(altura(raiz->esquerda), altura(raiz->direita));
+	int fb_raiz = fb(raiz);
+	int fb_esq = fb(raiz->esquerda);
+
+	arvore->comparacoes++;
+	if(fb_raiz > 1 ) {
+		arvore->comparacoes++;
+		if (fb_esq >= 0)
+			return rsd(arvore, raiz);
+		else {
+			raiz->esquerda = rse(arvore, raiz->esquerda);
+			return rsd(arvore, raiz);
+		}
+	}
+
+	arvore->comparacoes++;
+	int fb_dir = fb(raiz->direita); 
+	if(fb_raiz < -1 ) {
+		arvore->comparacoes++;
+		if(fb_dir <= 0)
+			return rse(arvore, raiz);
+		else {
+			raiz->direita = rsd(arvore, raiz->direita);
+			return rse(arvore, raiz);
+		}
+	}
+	return raiz;
+}
+
+NoAVL *remover(ArvoreAVL *arvore, int chave) {
+	return (!arvore || !arvore->raiz) ?
+		NULL :
+		remover_aux(arvore->raiz, chave, arvore);
 }
