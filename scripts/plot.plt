@@ -1,4 +1,4 @@
-set title 'Comparação'
+# set title 'Comparação'
 set xlabel 'Tamanho do conjunto'
 set ylabel 'Esforço computacional'
 set datafile separator ','
@@ -16,7 +16,7 @@ saidas = "insercao.png remocao.png"
 titulos = "Inserção Remoção"
 
 do for [i=1:words(arquivos)] {
-    # set title word(titulos, i)
+    set title word(titulos, i)
     arq = word(arquivos, i)
     out = "grafico_" . word(saidas, i)
 
