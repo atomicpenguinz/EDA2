@@ -4,7 +4,8 @@
 
 #define ARQUIVO1 "insercao.csv"
 #define ARQUIVO2 "remocao.csv"
-#define CONJUNTOS 30
+#define CONJUNTOS 50
+#define REPETICOES 30
 #define MAX_TAM 10000
 
 void shuffle(int *vetor, int tam);
@@ -15,7 +16,6 @@ int main() {
     int chaves[MAX_TAM];
     for(int i = 0; i < MAX_TAM; i++)
         chaves[i] = i;
-    shuffle(chaves, MAX_TAM);
 
     FILE *fInsert = fopen(ARQUIVO1, "w");
     FILE *fDelete = fopen(ARQUIVO2, "w");
@@ -24,40 +24,53 @@ int main() {
     fprintf(fDelete, "Tamanho,AVL,Rubro-negra,B1,B5,B10\n");
 
     for(int i = 1; i <= CONJUNTOS; i++) {
-        ArvoreAVL *avl = criar_arvore_avl();
-
         int tam = (MAX_TAM / CONJUNTOS) * i;
+        shuffle(chaves, MAX_TAM);
+        long comparacoesAVL_insercao = 0;
+        long comparacoesAVL_remocao = 0;
 
-        for(int j = 0; j < tam; j++) {
-            inserir_no_avl(avl, chaves[j]);
-            // inserir_no_rb...
+
+        for(int rep = 0; rep < REPETICOES; rep++) {
+            ArvoreAVL *avl = criar_arvore_avl();
+
+            for(int j = 0; j < tam; j++) {
+                inserir_no_avl(avl, chaves[j]);
+                // inserir_no_rb...
+            }
+
+            comparacoesAVL_insercao += avl->comparacoes;
+
+            shuffle(chaves, tam);
+
+            avl->comparacoes = 0L;
+            for(int j = 0L; j < tam; j++) {
+                remover_no_avl(avl, chaves[j]);
+                // remover_no_rb...
+            }
+
+            comparacoesAVL_remocao += avl->comparacoes;
+            free_avl(avl);
         }
         fprintf(fInsert,
-                "%d,%ld,%ld,%ld,%ld,%ld\n",
+                "%d,%.4lf,%ld,%ld,%ld,%ld\n",
                 tam,
-                avl->comparacoes,
-                0,
-                0,
-                0,
-                0);
-
-        shuffle(chaves, MAX_TAM);
-        avl->comparacoes = 0;
-
-        for(int j = 0; j < tam; j++) {
-            remover_no_avl(avl, chaves[j]);
-            // remover_no_rb...
-        }
+                (double) comparacoesAVL_insercao / (REPETICOES * tam),
+                0L,
+                0L,
+                0L,
+                0L);
         fprintf(fDelete,
-                "%d,%ld,%ld,%ld,%ld,%ld\n",
+                "%d,%.4lf,%ld,%ld,%ld,%ld\n",
                 tam,
-                avl->comparacoes,
-                0,
-                0,
-                0,
-                0);
-        free_avl(avl);
+                (double) comparacoesAVL_remocao / (REPETICOES * tam),
+                0L,
+                0L,
+                0L,
+                0L);
     }
+    fclose(fInsert);
+    fclose(fDelete);
+    return 0;
 }
 
 void shuffle(int *vetor, int tam) {
