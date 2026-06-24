@@ -16,17 +16,9 @@ typedef struct arvore {
 } ArvoreAVL;
 
 /* avl.c */
-ArvoreAVL *criar_arvore(void);
-NoAVL *criar_nodo(NoAVL *pai, int chave);
-int altura(NoAVL *no);
-void att_altura(NoAVL *no);
-int fb(NoAVL *no);
-NoAVL *rse(ArvoreAVL *arvore, NoAVL *no);
-NoAVL *rsd(ArvoreAVL *arvore, NoAVL *no);
-NoAVL *rde(ArvoreAVL *arvore, NoAVL *no);
-NoAVL *rdd(ArvoreAVL *arvore, NoAVL *no);
-NoAVL *adicionar_no(ArvoreAVL *arvore, NoAVL *no, int chave);
-void balanceamento(ArvoreAVL *arvore, NoAVL *no);
-NoAVL *inserir(ArvoreAVL *arvore, int valor);
-NoAVL *localizar(ArvoreAVL *arvore, NoAVL *no, int valor);
-NoAVL *remover(ArvoreAVL *arvore, int chave);
+ArvoreAVL *criar_arvore_avl(void);
+NoAVL *criar_nodo_avl(NoAVL *pai, int chave);
+void free_avl(ArvoreAVL *arvore);
+NoAVL *adicionar_no_avl(ArvoreAVL *arvore, NoAVL *no, int chave);
+NoAVL *inserir_no_avl(ArvoreAVL *arvore, int valor);
+NoAVL *remover_no_avl(ArvoreAVL *arvore, int chave);
