@@ -39,7 +39,8 @@ static int altura(NoAVL* no){
 	return no != NULL ? no->altura : 0;
 }
 
-static void att_altura(NoAVL *no) {
+static void att_altura(ArvoreAVL *arvore, NoAVL *no) {
+	arvore->comparacoes++;
 	no->altura = 1 + max(altura(no->esquerda), altura(no->direita));
 }
 
@@ -71,8 +72,8 @@ static NoAVL *rse(ArvoreAVL *arvore, NoAVL *no) {
 		else
 			pai->direita = direita;
 	}
-	att_altura(no);
-	att_altura(direita);
+	att_altura(arvore, no);
+	att_altura(arvore, direita);
 	return direita;
 }
 
@@ -99,8 +100,8 @@ static NoAVL *rsd(ArvoreAVL *arvore, NoAVL *no) {
 		else
 			pai->direita = esquerda;
 	}
-	att_altura(no);
-	att_altura(esquerda);
+	att_altura(arvore, no);
+	att_altura(arvore, esquerda);
 	return esquerda;
 }
 
@@ -122,21 +123,21 @@ NoAVL *adicionar_no_avl(ArvoreAVL *arvore, NoAVL *no, int chave) {
 		// arvore->comparacoes++;
 		if(!no->direita) {
 			no->direita = criar_nodo_avl(no, chave);
-			att_altura(no);
+			att_altura(arvore, no);
 			return no->direita;
 		} else {
 			NoAVL *novo = adicionar_no_avl(arvore, no->direita, chave);
-			att_altura(no);
+			att_altura(arvore, no);
 			return novo;
 		}
 	} else {
 		if(!no->esquerda) {
 			no->esquerda = criar_nodo_avl(no, chave);
-			att_altura(no);
+			att_altura(arvore, no);
 			return no->esquerda;
 		} else {
 			NoAVL *novo = adicionar_no_avl(arvore, no->esquerda, chave);
-			att_altura(no);
+			att_altura(arvore, no);
 			return novo;
 			}
 	}
