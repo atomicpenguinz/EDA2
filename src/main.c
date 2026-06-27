@@ -48,9 +48,9 @@ int main() {
                 for(int j = 0; j < n; j++)
                     chaves_tmp[j] = chaves[j];
                 shuffle(chaves_tmp, n);
-                avl->comparacoes = 0;
+
                 for(int j = 0; j < n; j++) {
-                    remover_no_avl(avl_tmp, chaves[j]);
+                    remover_no_avl(avl_tmp, chaves_tmp[j]);
                 }
                 comparacoesAVL_remocao[index] += avl_tmp->comparacoes;
                 free(chaves_tmp);
@@ -92,6 +92,9 @@ int main() {
     #ifdef DEBUG
     fclose(fDebug);
     #endif
+
+    free(comparacoesAVL_insercao);
+    free(comparacoesAVL_remocao);
     return 0;
 }
 
