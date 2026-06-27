@@ -13,6 +13,9 @@ void shuffle(int *vetor, int tam);
 int main() {
     srand(time(NULL));
 
+    #ifdef DEBUG
+    FILE *fDebug = fopen("debug.log", "w");
+    #endif
     int passo = MAX_TAM / CONJUNTOS;
     int chaves[MAX_TAM];
     for(int i = 0; i < MAX_TAM; i++)
@@ -21,6 +24,9 @@ int main() {
     long *comparacoesAVL_insercao = calloc(CONJUNTOS + 1, sizeof(long));
     long *comparacoesAVL_remocao = calloc(CONJUNTOS + 1, sizeof(long));
     for(int i = 0; i < REPETICOES; i++) {
+        #ifdef DEBUG
+        fprintf(fDebug, "repetição nº %d\n", i);
+        #endif
         shuffle(chaves, MAX_TAM);
         ArvoreAVL *avl = criar_arvore_avl();
 
@@ -29,18 +35,19 @@ int main() {
             inserir_no_avl(avl, chaves[n-1]);
 
             if((n % passo) == 0) {
+                #ifdef DEBUG
+                fprintf(fDebug, "\ttamanho: %d\n", n);
+                #endif
                 comparacoesAVL_insercao[index] += avl->comparacoes;
                 avl->comparacoes = 0;
                 ArvoreAVL *avl_tmp = criar_arvore_avl();
                 for(int j = 0; j < n; j++) {
                     inserir_no_avl(avl_tmp, chaves[j]);
                 }
-
                 int *chaves_tmp = malloc(n * sizeof(int));
                 for(int j = 0; j < n; j++)
                     chaves_tmp[j] = chaves[j];
                 shuffle(chaves_tmp, n);
-
                 avl->comparacoes = 0;
                 for(int j = 0; j < n; j++) {
                     remover_no_avl(avl_tmp, chaves[j]);
@@ -82,6 +89,9 @@ int main() {
     printf("arquivos '%s' e '%s' escritos\n", ARQUIVO1, ARQUIVO2);
     fclose(fInsert);
     fclose(fDelete);
+    #ifdef DEBUG
+    fclose(fDebug);
+    #endif
     return 0;
 }
 
