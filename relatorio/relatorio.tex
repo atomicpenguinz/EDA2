@@ -75,14 +75,53 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 \section{Objetivo do Trabalho}
+O objetivo do trabalho é analisar e comparar a complexidade computacional
+das operações de inserção e remoção de nós em árvores AVL, rubro-negras e B,
+considerando o custo de balanceamento. Para isso, foram usados conjuntos de dados
+aleatórios com tamanhos variando de 1 a 10 mil. Os resultados foram apresentados
+em gráficos que relacionam o esforço temporal das operações, seguidos de uma discussão
+sobre sobre o comportamento e a eficiência das diferentes estruturas apresentadas.
 
 \newpage
-\section{Solução fornecida}
+
+\section{Metodologia}
+Para a criação dos conjuntos aleatórios, foi criado um vetor de tamanho 10 mil
+em que cada posição armazena o próprio índice. Após isso, é usado um
+\href{https://benpfaff.org/writings/clc/shuffle.html}{algoritmo de embaralhamento}
+que randomiza o vetor com base em valores aleatórios obtidos com a função \textit{rand}.
+
+A partir desse vetor, o experimento foi construído de forma a avaliar o crescimento
+das estruturas de maneira \textit{contínua}. Ou seja, as árvores não são destruídas
+e recriadas a cada ciclo, mas sim crescem um tamanho de passo (400) a cada iteração,
+chegando a 10.000 na última.
+
+Quando o experimento chega em um dos pontos de amostragem (um múltiplo do tamanho do passo), o
+esforço computacional das operações é registrado. Para a inserção, é registrado apenas
+o custo das últimas 400 chaves. Isso faz com que o comportamento seja isolado e consigamos
+coletar apenas o custo da parte que importa, sem ser "diluído" pelo custo das inserções
+anteriores.
+
+Já para a remoção, no mesmo ponto, primeiramente são criadas cópias temporárias das
+árvores que estamos criando. Após isso, os elementos delas são copiados para um vetor
+auxiliar, embaralhados novamente para que tenhamos uma ordem de remoção aleatória, e
+aí sim são removidos da estrutura temporária, com as comparações sendo contabilizadas.
+Isso faz com que possamos contabilizar o custo de remoção em determinado tamanho sem
+interromper o crescimento das árvores principais.
 
 \newpage
-\section{Análise dos Resultados}
 
-\subsection{Resultados obtidos}
+\section{Implementação}
+
+\subsection{Árvore AVL}
+
+\subsection{Árvore Rubro-negra}
+
+\subsection{Árvores B}
+
+\newpage
+\section{Resultados}
+
+\subsection{Análise dos resultados}
 
 \newpage
 \section{Considerações Finais}
