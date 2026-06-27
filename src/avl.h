@@ -19,6 +19,5 @@ typedef struct arvore {
 ArvoreAVL *criar_arvore_avl(void);
 NoAVL *criar_nodo_avl(NoAVL *pai, int chave);
 void free_avl(ArvoreAVL *arvore);
-NoAVL *adicionar_no_avl(ArvoreAVL *arvore, NoAVL *no, int chave);
 NoAVL *inserir_no_avl(ArvoreAVL *arvore, int valor);
 NoAVL *remover_no_avl(ArvoreAVL *arvore, int chave);
