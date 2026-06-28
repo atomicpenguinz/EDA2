@@ -77,7 +77,7 @@
 \section{Objetivo do Trabalho}
 O objetivo do trabalho é analisar e comparar a complexidade computacional
 das operações de inserção e remoção de nós em árvores AVL, rubro-negras e B,
-considerando o custo de balanceamento. Para isso, foram usados conjuntos de dados
+considerando também o custo de balanceamento. Para isso, foram usados conjuntos de dados
 aleatórios com tamanhos variando de 1 a 10 mil. Os resultados foram apresentados
 em gráficos que relacionam o esforço temporal das operações, seguidos de uma discussão
 sobre sobre o comportamento e a eficiência das diferentes estruturas apresentadas.
@@ -97,7 +97,8 @@ chegando a 10.000 na última.
 
 Quando o experimento chega em um dos pontos de amostragem (um múltiplo do tamanho do passo), o
 esforço computacional das operações é registrado. Para a inserção, é registrado apenas
-o custo das últimas 400 chaves. Isso faz com que o comportamento seja isolado e consigamos
+o custo das últimas 400 chaves (janela entre o passo analisado e o próximo).
+Isso faz com que o comportamento seja isolado e consigamos
 coletar apenas o custo da parte que importa, sem ser "diluído" pelo custo das inserções
 anteriores.
 
@@ -113,6 +114,23 @@ interromper o crescimento das árvores principais.
 \section{Implementação}
 
 \subsection{Árvore AVL}
+A árvore AVL foi implementada de maneira similar a demonstrada em aula, porém com
+uma pequena diferença: cada nó também armazena um inteiro que representa sua altura.
+Essa altura é atualizada a cada inserção ou remoção e é usada no cálculo do fator de
+balanceamento, que se torna muito mais simples com essa informação já em mãos, sendo
+apenas a diferença entre as alturas das subárvores esquerda e direita
+($FB = altura(esquerda) - altura(direita)$). 
+Caso o (módulo do) valor do fator de balanceamento atinja 2, as rotações simples ou duplas
+são acionadas para reestruturar a árvore.
+
+Esse armazenamento das alturas de cada nó ajuda significativamente na eficiência da árvore,
+sendo o padrão na maioria das implementações disponíveis na \textit{internet}. Se a estrutura
+precisa percorrer recursivamente por todas suas subárvores para descobrir suas alturas a cada
+inserção ou remoção, a operação de balanceamento teria maior complexidade, com $O(n)$ no pior caso,
+diminuindo a vantagem de se usar uma árvore auto-balanceada.
+
+Quando cada nó armazena explicitamente sua altura, o cálculo do fator de balanceamento se torna
+uma operação de esforço constante $(O(1))$.
 
 \subsection{Árvore Rubro-negra}
 
