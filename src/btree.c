@@ -5,7 +5,7 @@ NoB *criar_no_b(ArvoreB *arvore) {
 	NoB *no = malloc(sizeof(NoB));
 	no->pai = NULL;
 	no->chaves = malloc(sizeof(int) * (max + 1));
-	no->filhos = malloc(sizeof(NoB) * (max + 2));o
+	no->filhos = malloc(sizeof(NoB*) * (max + 2));
 	no->total = 0;
 
 	for(int i = 0; i < max + 2; i++)
@@ -20,6 +20,7 @@ ArvoreB *criar_arvore_b(int ordem) {
 	arvore->ordem = ordem;
 	arvore->raiz = criar_no_b(arvore);
 	arvore->comparacoes = 0;
+	return arvore;
 }
 
 int pesquisa_binaria(NoB *no, int chave, ArvoreB *a) {
@@ -42,18 +43,16 @@ int pesquisa_binaria(NoB *no, int chave, ArvoreB *a) {
 }
 
 int localiza_chave(ArvoreB *a, int chave) {
-	while(!a->raiz) {
-		int i = pesquisa_binaria(a->raiz, chave, a);
-		a->comparacoes++;
-		NoB *no = a->raiz;
-		a->comparacoes++;
+	NoB *no = a->raiz;
+	while(no) {
+		int i = pesquisa_binaria(no, chave, a);
+		// a->comparacoes++; // analisar se faz sentido contabilizar essas comparações
 		if(i < no->total) {
-			a->comparacoes++;
+			// a->comparacoes++;
 			if(no->chaves[i] == chave)
 				return 1;
-		} else {
-			no = no->filhos[i];
 		}
+		no = no->filhos[i];
 	}
 	return 0;
 }
@@ -63,8 +62,9 @@ void adiciona_chave_em_no(NoB *no, NoB *direita, int chave, ArvoreB *a) {
 	for(int j =  no->total - 1; j >= i; j--) {
 		a->comparacoes++;
 		no->chaves[j+1] = no->chaves[j];
-		no->chaves[j+2] = no->chaves[j + 1];
+		no->filhos[j+2] = no->filhos[j + 1];
 	}
+	a->comparacoes++; // última do for()
 	no->chaves[i] = chave;
 	no->filhos[i + 1] = direita;
 	no->total++;
