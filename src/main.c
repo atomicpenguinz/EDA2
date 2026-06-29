@@ -1,6 +1,14 @@
 #include <time.h>
 
 #include "avl.h"
+#include "arq.h"
+
+extern No* raiz;
+extern unsigned long long esforco;
+
+void inserir(int valor);
+void remover(int valor);
+void liberar(No* nodo);
 
 #define ARQUIVO1 "insercao.csv"
 #define ARQUIVO2 "remocao.csv"
@@ -23,6 +31,10 @@ int main() {
 
     long *comparacoesAVL_insercao = calloc(CONJUNTOS + 1, sizeof(long));
     long *comparacoesAVL_remocao = calloc(CONJUNTOS + 1, sizeof(long));
+
+    long *comparacoesRN_insercao = calloc(CONJUNTOS + 1, sizeof(long));
+    long *comparacoesRN_remocao = calloc(CONJUNTOS + 1, sizeof(long));
+
     for(int i = 0; i < REPETICOES; i++) {
         #ifdef DEBUG
         fprintf(fDebug, "repetição nº %d\n", i);
@@ -30,9 +42,13 @@ int main() {
         shuffle(chaves, MAX_TAM);
         ArvoreAVL *avl = criar_arvore_avl();
 
+        raiz = NULL;
+        esforco = 0;
+
         int index = 1;
         for(int n = 1; n <= MAX_TAM; n++) {
             inserir_no_avl(avl, chaves[n-1]);
+            inserir(chaves[n-1]);
 
             if((n % passo) == 0) {
                 #ifdef DEBUG
@@ -40,26 +56,51 @@ int main() {
                 #endif
                 comparacoesAVL_insercao[index] += avl->comparacoes;
                 avl->comparacoes = 0;
+
+                comparacoesRN_insercao[index] += esforco;
+                esforco = 0;
+
                 ArvoreAVL *avl_tmp = criar_arvore_avl();
+                No* raiz_principal = raiz;
+                raiz = NULL;
+
                 for(int j = 0; j < n; j++) {
                     inserir_no_avl(avl_tmp, chaves[j]);
+                    inserir(chaves[j]);
                 }
+
                 int *chaves_tmp = malloc(n * sizeof(int));
                 for(int j = 0; j < n; j++)
                     chaves_tmp[j] = chaves[j];
                 shuffle(chaves_tmp, n);
 
+                esforco = 0;
+
                 for(int j = 0; j < n; j++) {
                     remover_no_avl(avl_tmp, chaves_tmp[j]);
+                    remover(chaves_tmp[j]);
+
                 }
+
+
                 comparacoesAVL_remocao[index] += avl_tmp->comparacoes;
+                comparacoesRN_remocao[index] += esforco;
+
                 free(chaves_tmp);
                 free_avl(avl_tmp);
+
+                raiz = raiz_principal;
+                esforco = 0;
+
                 index++;
             }
 
         }
         free_avl(avl);
+
+        liberar(raiz);
+        raiz = NULL;
+
     }
     FILE *fInsert = fopen(ARQUIVO1, "w");
     FILE *fDelete = fopen(ARQUIVO2, "w");
@@ -73,7 +114,7 @@ int main() {
                 "%d,%lf,%lf,%lf,%lf,%lf\n",
                 tam,
                 (double) comparacoesAVL_insercao[i] / (REPETICOES * passo),
-                0.0,
+                (double) comparacoesRN_insercao[i] / (REPETICOES * passo),
                 0.0,
                 0.0,
                 0.0);
@@ -81,7 +122,7 @@ int main() {
                 "%d,%lf,%lf,%lf,%lf,%lf\n",
                 tam,
                 (double) comparacoesAVL_remocao[i] / (REPETICOES * tam),
-                0.0,
+                (double) comparacoesRN_remocao[i] / (REPETICOES * passo),
                 0.0,
                 0.0,
                 0.0);
