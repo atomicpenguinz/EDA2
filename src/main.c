@@ -122,7 +122,7 @@ int main() {
                 "%d,%lf,%lf,%lf,%lf,%lf\n",
                 tam,
                 (double) comparacoesAVL_remocao[i] / (REPETICOES * tam),
-                (double) comparacoesRN_remocao[i] / (REPETICOES * passo),
+                (double) comparacoesRN_remocao[i] / (REPETICOES * tam),
                 0.0,
                 0.0,
                 0.0);

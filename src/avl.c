@@ -239,7 +239,7 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
     }
     if(!raiz) return NULL;
 
-    raiz->altura = 1 + max(altura(raiz->esquerda), altura(raiz->direita));
+    att_altura(arvore, raiz); 
     if(raiz->esquerda) raiz->esquerda->pai = raiz;
     if(raiz->direita) raiz->direita->pai = raiz;
 
