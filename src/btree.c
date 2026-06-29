@@ -83,7 +83,7 @@ void adiciona_chave_em_no(NoB *no, NoB *direita, int chave, ArvoreB *a) {
 	no->total++;
 }
 
-inline int transbordo(ArvoreB *arvore, NoB *no) {
+int transbordo(ArvoreB *arvore, NoB *no) {
 	arvore->comparacoes++;
 	return no->total > arvore->ordem * 2;
 }
@@ -132,3 +132,154 @@ void inserir_no_b(ArvoreB *arvore, int chave) {
 	adiciona_chave_aux(arvore, no, NULL, chave);
 }
 
+void remove_chave_de_no(NoB *no, int index){
+    for(int i=index; i < no->total - 1; i++){
+        no->chaves[i] = no->chaves[i + 1];
+        no->filhos[i + 1] = no->filhos[i + 2];
+    }
+    no->total--;
+}
+
+NoB *busca_no_chave(NoB *no, int chave, int *index, ArvoreB *a){
+    if(no==NULL) return NULL;
+    int i = pesquisa_binaria(no, chave, a);
+    if(i < no->total && no->chaves[i] == chave){
+        *index = i;
+        return no;
+    }
+    if(no->filhos[0] == NULL) return NULL; 
+    return busca_no_chave(no->filhos[i], chave, index, a);
+}
+
+void trata_subfluxo(ArvoreB *arvore, NoB *no){
+    arvore->comparacoes++;
+    if(no == arvore->raiz || no->total >= arvore->ordem) return;
+
+    NoB *pai = no->pai;
+    int idx_filho = 0;
+    while (pai->filhos[idx_filho] != no) idx_filho++;
+
+    NoB *irmao_esq = (idx_filho > 0) ? pai->filhos[idx_filho - 1] : NULL;
+    NoB *irmao_dir = (idx_filho < pai->total) ? pai->filhos[idx_filho + 1] : NULL;
+
+    if(irmao_esq && irmao_esq->total > arvore->ordem){
+        for(int i = no->total; i>0; i--) {
+            no->chaves[i] = no->chaves[i - 1];
+            no->filhos[i + 1] = no->filhos[i];
+        }
+        no->filhos[1] = no->filhos[0];
+
+        no->chaves[0] = pai->chaves[idx_filho - 1];
+        no->filhos[0] = irmao_esq->filhos[irmao_esq->total];
+        if(no->filhos[0]) no->filhos[0]->pai = no;
+        no->total++;
+
+        pai->chaves[idx_filho - 1] = irmao_esq->chaves[irmao_esq->total - 1];
+        irmao_esq->total--;
+        return;
+    }
+
+    if(irmao_dir && irmao_dir->total > arvore->ordem){
+        no->chaves[no->total] = pai->chaves[idx_filho];
+        no->filhos[no->total + 1] = irmao_dir->filhos[0];
+        if(no->filhos[no->total + 1]) no->filhos[no->total + 1]->pai = no;
+        no->total++;
+
+        pai->chaves[idx_filho] = irmao_dir->chaves[0];
+        
+        for(int i=0; i < irmao_dir->total - 1; i++) {
+            irmao_dir->chaves[i] = irmao_dir->chaves[i + 1];
+            irmao_dir->filhos[i] = irmao_dir->filhos[i + 1];
+        }
+        irmao_dir->filhos[irmao_dir->total - 1] = irmao_dir->filhos[irmao_dir->total];
+        irmao_dir->total--;
+        return;
+    }
+
+    if(irmao_esq){ 
+        irmao_esq->chaves[irmao_esq->total] = pai->chaves[idx_filho - 1];
+        irmao_esq->total++;
+
+        for(int i=0; i < no->total; i++) {
+            irmao_esq->chaves[irmao_esq->total] = no->chaves[i];
+            irmao_esq->filhos[irmao_esq->total] = no->filhos[i];
+            if(irmao_esq->filhos[irmao_esq->total]) irmao_esq->filhos[irmao_esq->total]->pai = irmao_esq;
+            irmao_esq->total++;
+        }
+        irmao_esq->filhos[irmao_esq->total] = no->filhos[no->total];
+        if(irmao_esq->filhos[irmao_esq->total]) irmao_esq->filhos[irmao_esq->total]->pai = irmao_esq;
+
+        remove_chave_de_no(pai, idx_filho - 1);
+        free(no->chaves); free(no->filhos); free(no);
+
+        if(pai == arvore->raiz && pai->total == 0) {
+            arvore->raiz = irmao_esq;
+            irmao_esq->pai = NULL;
+            free(pai->chaves); free(pai->filhos); free(pai);
+        }else{
+            trata_subfluxo(arvore, pai);
+        }
+    }else if(irmao_dir){
+        no->chaves[no->total] = pai->chaves[idx_filho];
+        no->total++;
+
+        for(int i=0; i < irmao_dir->total; i++) {
+            no->chaves[no->total] = irmao_dir->chaves[i];
+            no->filhos[no->total] = irmao_dir->filhos[i];
+            if(no->filhos[no->total]) no->filhos[no->total]->pai = no;
+            no->total++;
+        }
+        no->filhos[no->total] = irmao_dir->filhos[irmao_dir->total];
+        if(no->filhos[no->total]) no->filhos[no->total]->pai = no;
+
+        remove_chave_de_no(pai, idx_filho);
+        free(irmao_dir->chaves); free(irmao_dir->filhos); free(irmao_dir);
+
+        if(pai == arvore->raiz && pai->total == 0) {
+            arvore->raiz = no;
+            no->pai = NULL;
+            free(pai->chaves); free(pai->filhos); free(pai);
+        }else{
+            trata_subfluxo(arvore, pai);
+        }
+    }
+}
+
+void remover_no_b(ArvoreB *arvore, int chave){
+    int index;
+    NoB *no = busca_no_chave(arvore->raiz, chave, &index, arvore);
+    if (!no) return; 
+
+    if(no->filhos[0] != NULL) {
+        NoB *sucessor = no->filhos[index + 1];
+        while (sucessor->filhos[0] != NULL) sucessor = sucessor->filhos[0];
+        
+        no->chaves[index] = sucessor->chaves[0];
+        no = sucessor;
+        index = 0;
+    }
+
+    remove_chave_de_no(no, index);
+
+    trata_subfluxo(arvore, no);
+}
+
+void libera_no_b(NoB *no){
+    if(no){
+        if(no->filhos[0] != NULL){
+            for(int i=0; i <= no->total; i++){
+                libera_no_b(no->filhos[i]);
+            }
+        }
+        free(no->chaves);
+        free(no->filhos);
+        free(no);
+    }
+}
+
+void libera_arvore_b(ArvoreB *arvore){
+    if(arvore){
+        libera_no_b(arvore->raiz);
+        free(arvore);
+    }
+}
