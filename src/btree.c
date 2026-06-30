@@ -28,11 +28,9 @@ int pesquisa_binaria(NoB *no, int chave, ArvoreB *a) {
 	while(inicio <= fim) {
 		a->comparacoes++;
 		meio = (inicio + fim) / 2;
-		a->comparacoes++;
 		if(no->chaves[meio] == chave) {
 			return meio;
 		} else {
-			a->comparacoes++;
 			if(no->chaves[meio] > chave)
 				fim = meio - 1;
 			else
@@ -46,9 +44,8 @@ int localiza_chave(ArvoreB *a, int chave) {
 	NoB *no = a->raiz;
 	while(no) {
 		int i = pesquisa_binaria(no, chave, a);
-		// a->comparacoes++; // analisar se faz sentido contabilizar essas comparações
 		if(i < no->total) {
-			// a->comparacoes++;
+			a->comparacoes++;
 			if(no->chaves[i] == chave)
 				return 1;
 		}
@@ -61,7 +58,6 @@ NoB *localiza_no(ArvoreB *a, int chave) {
 	NoB *no = a->raiz;
 	while(no) {
 		int i = pesquisa_binaria(no, chave, a);
-		// a->comparacoes++; // analisar se faz sentido contabilizar essas comparações
 		if(no->filhos[i] == NULL)
 			return no;
 		else
@@ -73,18 +69,15 @@ void adiciona_chave_em_no(NoB *no, NoB *direita, int chave, ArvoreB *a) {
 	int i = pesquisa_binaria(no, chave, a);
 
 	for(int j =  no->total - 1; j >= i; j--) {
-		// a->comparacoes++;
 		no->chaves[j+1] = no->chaves[j];
 		no->filhos[j+2] = no->filhos[j + 1];
 	}
-	// a->comparacoes++; // última do for()
 	no->chaves[i] = chave;
 	no->filhos[i + 1] = direita;
 	no->total++;
 }
 
 int transbordo(ArvoreB *arvore, NoB *no) {
-	arvore->comparacoes++;
 	return no->total > arvore->ordem * 2;
 }
 
@@ -143,6 +136,8 @@ void remove_chave_de_no(NoB *no, int index){
 NoB *busca_no_chave(NoB *no, int chave, int *index, ArvoreB *a){
     if(no==NULL) return NULL;
     int i = pesquisa_binaria(no, chave, a);
+
+    a->comparacoes++;
     if(i < no->total && no->chaves[i] == chave){
         *index = i;
         return no;
@@ -152,7 +147,6 @@ NoB *busca_no_chave(NoB *no, int chave, int *index, ArvoreB *a){
 }
 
 void trata_subfluxo(ArvoreB *arvore, NoB *no){
-    arvore->comparacoes++;
     if(no == arvore->raiz || no->total >= arvore->ordem) return;
 
     NoB *pai = no->pai;

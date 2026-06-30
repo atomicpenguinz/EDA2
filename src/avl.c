@@ -42,7 +42,6 @@ static int altura(NoAVL* no) {
 }
 
 static void att_altura(ArvoreAVL *arvore, NoAVL *no) {
-    arvore->comparacoes++;
     no->altura = 1 + max(altura(no->esquerda), altura(no->direita));
 }
 
@@ -149,18 +148,14 @@ static void balanceamento_avl(ArvoreAVL *arvore, NoAVL *no) {
     for(; no != NULL; no = no->pai) {
         int fator = fb(no);
 
-        arvore->comparacoes++;
         if(fator > 1) {
-            arvore->comparacoes++;
             if(fb(no->esquerda) > 0) {
                 rsd(arvore, no);
             } else {
                 rdd(arvore, no);
             }
         } else {
-            arvore->comparacoes++;
             if(fator < -1) {
-                arvore->comparacoes++;
                 if(fb(no->direita) < 0) {
                     rse(arvore, no);
                 } else {
@@ -173,7 +168,6 @@ static void balanceamento_avl(ArvoreAVL *arvore, NoAVL *no) {
 #define VAZIA(arvore) (arvore->raiz == NULL)
 
 NoAVL *inserir_no_avl(ArvoreAVL *arvore, int valor) {
-    arvore->comparacoes++;
     if(VAZIA(arvore)) {
         NoAVL *novo = criar_nodo_avl(NULL, valor);
         arvore->raiz = novo;
@@ -192,7 +186,6 @@ static NoAVL* localizar_no_avl(ArvoreAVL *arvore, NoAVL* no, int valor) {
     if (no->chave == valor) {
         return no;
     } else {
-        arvore->comparacoes++;
         if(valor < no->chave)
             return localizar_no_avl(arvore, no->esquerda, valor);
         else
@@ -216,7 +209,6 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
     if(chave < raiz->chave)
         raiz->esquerda= remover_aux(raiz->esquerda, chave, arvore);
     else {
-        arvore->comparacoes++;
         if (chave > raiz->chave) {
             raiz->direita = remover_aux(raiz->direita, chave, arvore);
         } else {
@@ -247,9 +239,7 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
     int fb_esq = fb(raiz->esquerda);
     int fb_dir = fb(raiz->direita);
 
-    arvore->comparacoes++;
     if(fb_raiz > 1) {
-        arvore->comparacoes++;
         if (fb_esq >= 0)
             return rsd(arvore, raiz);
         else {
@@ -258,9 +248,7 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
         }
     }
 
-    arvore->comparacoes++;
     if(fb_raiz < -1 ) {
-        arvore->comparacoes++;
         if(fb_dir <= 0)
             return rse(arvore, raiz);
         else {

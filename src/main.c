@@ -75,6 +75,7 @@ int main() {
                 shuffle(chaves_tmp, n);
 
                 esforco = 0;
+                avl_tmp->comparacoes = 0;
 
                 for(int j = 0; j < n; j++) {
                     remover_no_avl(avl_tmp, chaves_tmp[j]);

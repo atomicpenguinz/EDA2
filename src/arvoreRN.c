@@ -4,7 +4,6 @@ No* raiz = NULL;
 unsigned long long esforco = 0;
 
 No* bst(No* arv, No* aux){
-    esforco++;
     
     if(arv == NULL){
         return aux;
@@ -25,7 +24,6 @@ No* bst(No* arv, No* aux){
 }
 
 void rodaDireita(No* aux){
-    esforco++;
 
     No* esq = aux->esquerda;
     aux->esquerda = esq->direita;
@@ -47,7 +45,6 @@ void rodaDireita(No* aux){
 }
 
 void rodaEsquerda(No* aux){
-    esforco++;
 
     No* dir = aux->direita;
     aux->direita = dir->esquerda;
@@ -73,7 +70,6 @@ void balancearAdd(No* nodo){
     No* voNodo = NULL;
 
     while((nodo != raiz) && (nodo->cor != 0) && (nodo->pai->cor == 1)){
-        esforco++;
 
         paiNodo = nodo->pai;
         voNodo = nodo->pai->pai;
@@ -131,7 +127,6 @@ void balancearAdd(No* nodo){
 }
 
 void troca(No* nodo, No* aux){
-    esforco++;
 
     if(nodo->pai == NULL){
         raiz = aux;
@@ -152,7 +147,6 @@ void balancearRem(No* u, No* uPai){
     No* v = NULL;
 
     while(u != raiz && (u == NULL || u->cor == 0)){
-        esforco++;
 
         if(u == uPai->esquerda){
             v = uPai->direita;
@@ -227,8 +221,6 @@ void balancearRem(No* u, No* uPai){
 
 void removerNodo(No* z){
     if(z == NULL) return;
-
-    esforco++;
 
     No* y = z;
     No* x = NULL;
