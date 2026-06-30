@@ -88,6 +88,7 @@ sobre sobre o comportamento e a eficiência das diferentes estruturas apresentad
 Para a criação dos conjuntos aleatórios, foi criado um vetor de tamanho 10 mil
 em que cada posição armazena o próprio índice. Após isso, é usado um
 \href{https://benpfaff.org/writings/clc/shuffle.html}{algoritmo de embaralhamento}
+chamado Fisher-Yates
 que randomiza o vetor com base em valores aleatórios obtidos com a função \textit{rand}.
 
 A partir desse vetor, o experimento foi construído de forma a avaliar o crescimento
@@ -95,6 +96,8 @@ das estruturas de maneira \textit{contínua}. Ou seja, as árvores não são des
 e recriadas a cada ciclo, mas sim crescem um tamanho de passo (400) a cada iteração,
 chegando a 10.000 na última.
 
+
+Em cada ponto de amostragem
 Quando o experimento chega em um dos pontos de amostragem (um múltiplo do tamanho do passo), o
 esforço computacional das operações é registrado. Para a inserção, é registrado apenas
 o custo das últimas 400 chaves (janela entre o passo analisado e o próximo).
