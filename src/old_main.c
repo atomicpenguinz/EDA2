@@ -121,6 +121,7 @@ int main() {
                 (double) comparacoesB5_remocao / (REPETICOES * tam),
                 (double) comparacoesB10_remocao / (REPETICOES * tam));
     }
+    printf("arquivos '%s' e '%s' escritos\n", ARQUIVO1, ARQUIVO2);
     fclose(fInsert);
     fclose(fDelete);
     return 0;
