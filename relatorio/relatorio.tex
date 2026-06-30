@@ -216,7 +216,7 @@ dados internos mais frequentemente que a Rubro-negra, que acabou "ganhando" a di
 \centering
 \fbox{\includegraphics[width=0.8\textwidth]{../scripts/grafico_remocao.png}}
 \caption{Gráfico }
-\end{figure}{H}
+\end{figure}
 Aqui notamos algumas coisas interessantes. A árvore B "disparou" como a pior de todas.
 Isso ocorre porque ela armazena no máximo 2 chaves por nó, e por ter nós pequenos, ela
 acaba tendo uma alta taxa de underflow, além de ter o overhead da função trata\_subfluxo.
@@ -225,7 +225,7 @@ Também notamos que a AVL fica em segundo lugar. Isso vem de um motivo similar a
 na inserção; a árvore AVL é mais estrita, e acaba realizando mais comparações em suas operações.
 Além disso, podemos ver que as árvores B5 e B10 melhoraram, pois, nesse caso, seus nós
 com muitas chaves são uma vantagem, já que  a remoção de um elemento raramente causa um subfluxo.
-Outro fator é de que o algoritmo quase não precisa recorrer a fusões de chaves entre irmão, "desviando"
+Outro fator é de que o algoritmo quase não precisa recorrer a fusões de chaves entre irmãos, "desviando"
 do custo da função trata\_subfluxo.
 
 A Observação mais diferente e inesperada é a da árvore rubro-negra ser considerada a
