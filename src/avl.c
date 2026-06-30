@@ -186,6 +186,7 @@ static NoAVL* localizar_no_avl(ArvoreAVL *arvore, NoAVL* no, int valor) {
     if (no->chave == valor) {
         return no;
     } else {
+        arvore->comparacoes++;
         if(valor < no->chave)
             return localizar_no_avl(arvore, no->esquerda, valor);
         else
@@ -209,6 +210,7 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
     if(chave < raiz->chave)
         raiz->esquerda= remover_aux(raiz->esquerda, chave, arvore);
     else {
+        arvore->comparacoes++;
         if (chave > raiz->chave) {
             raiz->direita = remover_aux(raiz->direita, chave, arvore);
         } else {
@@ -217,9 +219,9 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
                 if(!aux) {
                     if(raiz->pai) {
                         if(raiz->pai->esquerda == raiz)
-                            raiz->pai->esquerda = NULL;
+                            raiz->pai->esquerda = aux;
                         else
-                            raiz->pai->direita = NULL;
+                            raiz->pai->direita = aux;
                     }
                     free(raiz);
                     raiz = NULL;
@@ -227,9 +229,9 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
                     aux->pai = raiz->pai;
                     if(raiz->pai) {
                         if(raiz->pai->esquerda == raiz)
-                            raiz->pai->esquerda = NULL;
+                            raiz->pai->esquerda = aux;
                         else
-                            raiz->pai->direita = NULL;
+                            raiz->pai->direita = aux;
                     }
                 free(raiz);
                 raiz = aux;

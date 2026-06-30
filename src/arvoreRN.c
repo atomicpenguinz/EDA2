@@ -14,8 +14,7 @@ No* bst(No* arv, No* aux){
         arv->esquerda = bst(arv->esquerda, aux);
         arv->esquerda->pai = arv;
     }
-
-    else if(aux->valor >= arv->valor){
+    else {
         arv->direita = bst(arv->direita, aux);
         arv->direita->pai = arv;
     }
@@ -70,7 +69,7 @@ void balancearAdd(No* nodo){
     No* voNodo = NULL;
 
     while((nodo != raiz) && (nodo->cor != 0) && (nodo->pai->cor == 1)){
-
+        esforco += 2;
         paiNodo = nodo->pai;
         voNodo = nodo->pai->pai;
 
