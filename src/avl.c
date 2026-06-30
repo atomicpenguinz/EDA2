@@ -215,12 +215,24 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
             if(!raiz->esquerda || !raiz->direita) {
                 NoAVL *aux = raiz->esquerda ? raiz->esquerda : raiz->direita;
                 if(!aux) {
+                    if(raiz->pai) {
+                        if(raiz->pai->esquerda == raiz)
+                            raiz->pai->esquerda = NULL;
+                        else
+                            raiz->pai->direita = NULL;
+                    }
                     free(raiz);
                     raiz = NULL;
                 } else {
                     aux->pai = raiz->pai;
-                    free(raiz);
-                    raiz = aux;
+                    if(raiz->pai) {
+                        if(raiz->pai->esquerda == raiz)
+                            raiz->pai->esquerda = NULL;
+                        else
+                            raiz->pai->direita = NULL;
+                    }
+                free(raiz);
+                raiz = aux;
                 }
             } else {
                 NoAVL *aux = menor_no(raiz->direita);
@@ -236,8 +248,8 @@ static NoAVL *remover_aux(NoAVL *raiz, int chave, ArvoreAVL *arvore) {
     if(raiz->direita) raiz->direita->pai = raiz;
 
     int fb_raiz = fb(raiz);
-    int fb_esq = fb(raiz->esquerda);
-    int fb_dir = fb(raiz->direita);
+    int fb_esq = raiz->esquerda ? fb(raiz->esquerda) : 0;
+    int fb_dir = raiz->direita ? fb(raiz->direita) : 0;
 
     if(fb_raiz > 1) {
         if (fb_esq >= 0)
