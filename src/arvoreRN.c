@@ -69,7 +69,6 @@ void balancearAdd(No* nodo){
     No* voNodo = NULL;
 
     while((nodo != raiz) && (nodo->cor != 0) && (nodo->pai->cor == 1)){
-        esforco += 2;
         paiNodo = nodo->pai;
         voNodo = nodo->pai->pai;
 

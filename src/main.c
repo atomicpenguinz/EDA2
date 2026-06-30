@@ -2,17 +2,17 @@
 
 #include "avl.h"
 #include "arq.h"
+#include "btree.h"
 
 extern No* raiz;
 extern unsigned long long esforco;
-
 void inserir(int valor);
 void remover(int valor);
 void liberar(No* nodo);
 
 #define ARQUIVO1 "insercao.csv"
 #define ARQUIVO2 "remocao.csv"
-#define CONJUNTOS 25
+#define CONJUNTOS 50
 #define REPETICOES 30
 #define MAX_TAM 10000
 
@@ -21,88 +21,11 @@ void shuffle(int *vetor, int tam);
 int main() {
     srand(time(NULL));
 
-    #ifdef DEBUG
-    FILE *fDebug = fopen("debug.log", "w");
-    #endif
     int passo = MAX_TAM / CONJUNTOS;
     int chaves[MAX_TAM];
     for(int i = 0; i < MAX_TAM; i++)
         chaves[i] = i;
 
-    long *comparacoesAVL_insercao = calloc(CONJUNTOS + 1, sizeof(long));
-    long *comparacoesAVL_remocao = calloc(CONJUNTOS + 1, sizeof(long));
-
-    long *comparacoesRN_insercao = calloc(CONJUNTOS + 1, sizeof(long));
-    long *comparacoesRN_remocao = calloc(CONJUNTOS + 1, sizeof(long));
-
-    for(int i = 0; i < REPETICOES; i++) {
-        #ifdef DEBUG
-        fprintf(fDebug, "repetição nº %d\n", i);
-        #endif
-        shuffle(chaves, MAX_TAM);
-        ArvoreAVL *avl = criar_arvore_avl();
-
-        raiz = NULL;
-        esforco = 0;
-
-        int index = 1;
-        for(int n = 1; n <= MAX_TAM; n++) {
-            inserir_no_avl(avl, chaves[n-1]);
-            inserir(chaves[n-1]);
-
-            if((n % passo) == 0) {
-                #ifdef DEBUG
-                fprintf(fDebug, "\ttamanho: %d\n", n);
-                #endif
-                comparacoesAVL_insercao[index] += avl->comparacoes;
-                avl->comparacoes = 0;
-
-                comparacoesRN_insercao[index] += esforco;
-                esforco = 0;
-
-                ArvoreAVL *avl_tmp = criar_arvore_avl();
-                No* raiz_principal = raiz;
-                raiz = NULL;
-
-                for(int j = 0; j < n; j++) {
-                    inserir_no_avl(avl_tmp, chaves[j]);
-                    inserir(chaves[j]);
-                }
-
-                int *chaves_tmp = malloc(n * sizeof(int));
-                for(int j = 0; j < n; j++)
-                    chaves_tmp[j] = chaves[j];
-                shuffle(chaves_tmp, n);
-
-                esforco = 0;
-                avl_tmp->comparacoes = 0;
-
-                for(int j = 0; j < n; j++) {
-                    remover_no_avl(avl_tmp, chaves_tmp[j]);
-                    remover(chaves_tmp[j]);
-
-                }
-
-
-                comparacoesAVL_remocao[index] += avl_tmp->comparacoes;
-                comparacoesRN_remocao[index] += esforco;
-
-                free(chaves_tmp);
-                free_avl(avl_tmp);
-
-                raiz = raiz_principal;
-                esforco = 0;
-
-                index++;
-            }
-
-        }
-        free_avl(avl);
-
-        liberar(raiz);
-        raiz = NULL;
-
-    }
     FILE *fInsert = fopen(ARQUIVO1, "w");
     FILE *fDelete = fopen(ARQUIVO2, "w");
 
@@ -111,32 +34,96 @@ int main() {
 
     for(int i = 1; i <= CONJUNTOS; i++) {
         int tam = passo * i;
+
+        long comparacoesAVL_insercao = 0;
+        long comparacoesAVL_remocao = 0;
+
+        long comparacoesRN_insercao = 0;
+        long comparacoesRN_remocao = 0;
+
+        long comparacoesB1_insercao = 0;
+        long comparacoesB1_remocao = 0;
+
+        long comparacoesB5_insercao = 0;
+        long comparacoesB5_remocao = 0;
+
+        long comparacoesB10_insercao = 0;
+        long comparacoesB10_remocao = 0;
+
+        for(int r = 0; r < REPETICOES; r++) {
+            shuffle(chaves, MAX_TAM);
+
+            ArvoreAVL *avl = criar_arvore_avl();
+            ArvoreB *b1 = criar_arvore_b(1);
+            ArvoreB *b5 = criar_arvore_b(5);
+            ArvoreB *b10 = criar_arvore_b(10);
+
+            raiz = NULL;
+            esforco = 0;
+
+            for(int j = 0; j < tam; j++) {
+                inserir_no_avl(avl, chaves[j]);
+                inserir(chaves[j]);
+                inserir_no_b(b1, chaves[j]);
+                inserir_no_b(b5, chaves[j]);
+                inserir_no_b(b10, chaves[j]);
+            }
+            comparacoesAVL_insercao += avl->comparacoes;
+            comparacoesB1_insercao += b1->comparacoes;
+            comparacoesB5_insercao += b5->comparacoes;
+            comparacoesB10_insercao += b10->comparacoes;
+            comparacoesRN_insercao += esforco;
+
+            shuffle(chaves, tam);
+
+            avl->comparacoes = 0;
+            b1->comparacoes = 0;
+            b5->comparacoes = 0;
+            b10->comparacoes = 0;
+            esforco = 0;
+
+            for(int j = 0; j < tam; j++) {
+                remover_no_avl(avl, chaves[j]);
+                remover_no_b(b1, chaves[j]);
+                remover_no_b(b5, chaves[j]);
+                remover_no_b(b10, chaves[j]);
+                remover(chaves[j]);
+            }
+
+            comparacoesAVL_remocao += avl->comparacoes;
+            comparacoesB1_remocao += b1->comparacoes;
+            comparacoesB5_remocao += b5->comparacoes;
+            comparacoesB10_remocao += b10->comparacoes;
+            comparacoesRN_remocao += esforco;
+
+            free_avl(avl);
+            libera_arvore_b(b1);
+            libera_arvore_b(b5);
+            libera_arvore_b(b10);
+            liberar(raiz);
+            raiz = NULL;
+        }
         fprintf(fInsert,
                 "%d,%lf,%lf,%lf,%lf,%lf\n",
                 tam,
-                (double) comparacoesAVL_insercao[i] / (REPETICOES * passo),
-                (double) comparacoesRN_insercao[i] / (REPETICOES * passo),
-                0.0,
-                0.0,
-                0.0);
+                (double) comparacoesAVL_insercao / (REPETICOES * tam),
+                (double) comparacoesRN_insercao / (REPETICOES * tam),
+                (double) comparacoesB1_insercao / (REPETICOES * tam),
+                (double) comparacoesB5_insercao / (REPETICOES * tam),
+                (double) comparacoesB10_insercao / (REPETICOES * tam));
+
         fprintf(fDelete,
                 "%d,%lf,%lf,%lf,%lf,%lf\n",
                 tam,
-                (double) comparacoesAVL_remocao[i] / (REPETICOES * tam),
-                (double) comparacoesRN_remocao[i] / (REPETICOES * tam),
-                0.0,
-                0.0,
-                0.0);
+                (double) comparacoesAVL_remocao / (REPETICOES * tam),
+                (double) comparacoesRN_remocao / (REPETICOES * tam),
+                (double) comparacoesB1_remocao / (REPETICOES * tam),
+                (double) comparacoesB5_remocao / (REPETICOES * tam),
+                (double) comparacoesB10_remocao / (REPETICOES * tam));
     }
     printf("arquivos '%s' e '%s' escritos\n", ARQUIVO1, ARQUIVO2);
     fclose(fInsert);
     fclose(fDelete);
-    #ifdef DEBUG
-    fclose(fDebug);
-    #endif
-
-    free(comparacoesAVL_insercao);
-    free(comparacoesAVL_remocao);
     return 0;
 }
 
