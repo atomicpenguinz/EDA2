@@ -159,6 +159,13 @@ Esse armazenamento da cor em cada nó é o detalhe que confere a eficiência des
 
 
 \subsection{Árvores B}
+A implementação da Árvore B foi projetada para ser flexível em relação ao seu parâmetro de ordem, que define a capacidade de ocupação de cada nó. Diferente das árvores AVL e Rubro-Negra, que são estruturalmente binárias, a Árvore B agrupa múltiplas chaves e ponteiros em um único bloco de memória. Na implementação, a capacidade máxima de um nó foi definida como $2 \times \text{ordem}$ chaves.
+
+Para otimizar o desempenho computacional, a busca pela posição correta de uma chave dentro do vetor de um nó não é feita de forma sequencial, mas sim através de uma \textit{busca binária} (implementada na função \verb|pesquisa_binaria|). Embora árvores B de maior ordem (como a ordem 10) possuam menos níveis (reduzindo a descida na árvore), elas acomodam vetores maiores em cada nó, o que eleva a quantidade de comparações feitas pela busca binária local.
+
+A operação de adição ocorre com a localização da folha adequada e a inserção ordenada da nova chave. Caso a quantidade de chaves do nó ultrapasse o limite máximo estabelecido, é disparada a condição de transbordo (\textit{overflow}). Nesse cenário, o algoritmo realiza a operação de \textit{split} (divisão): o nó é particionado em dois e a chave mediana é promovida para o nó pai. Esse processo pode ocorrer em cascata, subindo pela estrutura e, no limite, dividindo a raiz e aumentando a altura da árvore.
+
+Por fim, a operação de remoção foi realizada de forma que, para evitar lacunas no meio da árvore, caso a exclusão seja solicitada em um nó interno, a chave é previamente substituída por seu sucessor imediato (que sempre reside em um nó folha). A remoção física ocorre exclusivamente nas folhas. Após a exclusão, caso o número de chaves do nó caia abaixo do mínimo aceitável (condição de \textit{underflow}, que equivale à ordem da árvore), o algoritmo tenta realizar o empréstimo de uma chave de um de seus nós irmãos adjacentes através do pai. Se ambos os irmãos estiverem no limite mínimo, é realizada a operação de fusão (\textit{merge}) do nó com seu irmão e a chave separadora do pai, um processo que diminui o tamanho do nó pai e pode propagar o \textit{underflow} até a raiz da árvore.
 
 \newpage
 \section{Resultados}
