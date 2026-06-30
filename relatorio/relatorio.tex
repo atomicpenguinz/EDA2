@@ -92,25 +92,23 @@ chamado Fisher-Yates
 que randomiza o vetor com base em valores aleatórios obtidos com a função \textit{rand}.
 
 A partir desse vetor, o experimento foi construído de forma a avaliar o crescimento
-das estruturas de maneira \textit{contínua}. Ou seja, as árvores não são destruídas
-e recriadas a cada ciclo, mas sim crescem um tamanho de passo (400) a cada iteração,
-chegando a 10.000 na última.
+das estruturas de maneira incremental. Em cada iteração, as árvores são criadas do zero.
+Em seguida, os elementos são inseridos em passos fixos (400 elementos, no nosso caso) até
+atingir o tamanho máximo (10 mil).
 
+Em cada ponto de amostragem, o custo computacional das operações é acumulado pelas inserções
+realizadas naquela repetição. Dessa forma, cada ponto do gráfico representa o comportamento
+de crescimento da estrutura ao longo de sua construção incremental.
 
-Em cada ponto de amostragem
-Quando o experimento chega em um dos pontos de amostragem (um múltiplo do tamanho do passo), o
-esforço computacional das operações é registrado. Para a inserção, é registrado apenas
-o custo das últimas 400 chaves (janela entre o passo analisado e o próximo).
-Isso faz com que o comportamento seja isolado e consigamos
-coletar apenas o custo da parte que importa, sem ser "diluído" pelo custo das inserções
-anteriores.
+Para a remoção, no mesmo ponto, as chaves presentes nas estruturas são copiados para um vetor
+auxiliar e embaralhados novamente, fazendo com que haja uma ordem aleatória na remoção.
+Em seguida, todas as chaves são removidas das árvores previamente criadas, com o custo
+sendo contabilizado. Assim, é possível medir o comportamento de inserção e remoção aproveitando
+uma mesma árvore, ao mesmo tempo que mantemos diferentes tamanhos de entrada.
 
-Já para a remoção, no mesmo ponto, primeiramente são criadas cópias temporárias das
-árvores que estamos criando. Após isso, os elementos delas são copiados para um vetor
-auxiliar, embaralhados novamente para que tenhamos uma ordem de remoção aleatória, e
-aí sim são removidos da estrutura temporária, com as comparações sendo contabilizadas.
-Isso faz com que possamos contabilizar o custo de remoção em determinado tamanho sem
-interromper o crescimento das árvores principais.
+Como os resultados são divididos pelo número de repetições realizadas + o tamanho de suas
+respectivas árvores, os gráficos finais mostram a média de 30 comparações realizadas em cada
+tamanho.
 
 \subsection{Contagem de comparações}
 Para estabelecer um método de comparação entre a complexidade das diferentes árvores,
@@ -123,15 +121,22 @@ além do operador ternário \verb|?|.
 Contudo, nem toda ocorrência desses termos é contabilizada para os fins deste trabalho.
 A justificativa para isso é de que nem toda comparação no código é inerente à estrutura
 analisada, sendo muitas vezes apenas parte da organização do fluxo do programa.
-O principal exemplo de comparação não contabilizada em nosso código são as variáveis e
-condições de laços de repetição, como \verb|j > i|, operadores de verificação de ponteiros,
-como \verb|if(raiz == NULL)| ou \verb|if(!raiz)|, e validações de alocações de memória.
+Portanto, seguindo um modelo parecido com o que foi apresentado em sala durante a
+verificação de complexidade de diferentes buscas em vetores, contabilizamos como
+comparações apenas aquelas que acontecem entre chaves ou entre chaves e valores internos
+da estrutura.
+
+Assim, não são contabilizadas como parte da métrica operações de verificação de ponteiros,
+como \verb|if(raiz == NULL) ou \verb|if(!raiz)|, usadas para controle de fluxo ou verificações
+de alocação de memória.
 
 Essas operações são produtos apenas de decisões de implementação e gerenciamento de
 fluxo em linguagem C, e não representam o custo "matemático" do algoritmo. Portanto,
 foram contabilizados apenas os testes de relação entre chaves e de elementos armazenados,
 esse sim próprios a cada estrutura de dados.
 
+Dessa forma, a métrica utilizada foca exclusivamente no custo de comparação entre elementos
+armazenados.
 \section{Implementação}
 
 \subsection{Árvore AVL}
@@ -172,10 +177,61 @@ Por fim, a operação de remoção foi realizada de forma que, para evitar lacun
 
 \newpage
 \section{Resultados}
+A partir dos arquivos \verb|.csv| criados na função \verb|main()|, foram criados
+dois gráficos, preparados através de um script do \textit{software} \href{http://gnuplot.info/}{gnuplot}.
+Vamos analisar cada um deles:
 
-\subsection{Análise dos resultados}
+\subsection{Inserção de Chaves}
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.8\textwidth]{../scripts/grafico_insercao.png}}
+\caption{Gráfico }
+\end{figure}
 
-\newpage
-\section{Considerações Finais}
+Aqui podemos observar que as árvores B geram maior esforço computacional durante
+a inserção, de modo que quanto maior a ordem da árvore, maior o esforço. Na teoria,
+as árvores B são mais eficientes para reduzir acessos à memória secundária (HD, SSD etc.),
+pois acabam sendo mais largas e rasas. Porém, quando é medido apenas esforço computacional,
+nesse caso comparações entre chaves realizadas na memória principal (RAM), elas acabam sendo
+penalisadas por alguns fatores.
 
+O primeiro é o da busca binária que ocorre em cada nó. Para descer um único nível em direção
+à suas folhas, as AVL e Rubro-negras fazem apenas uma comparação de chaves. Já as B, como
+armazenam múltiplos elementos em um nó, realizam várias operações em um loop \verb|while|
+interno.
+
+Ademais, quando um nó transborda, a chave promovida precisa ser reinserida no pai.
+Na nossa implementação, isso chama uma nova busca binária no pai, o que ajuda a
+acumular ainda mais comparações.
+
+A ordem da árvore também importa nesse caso. Quanto maior ela for, maior é a densidade
+das chaves armazenadas no vetor interno de cada nó. Assim, a busca binária fará mais iterações.
+
+Também é notável que a AVL exige mais esforço que a Rubro-Negra. Isso ocorre pois a AVL é
+mais rígida em seu critério de balanceamento, fazendo com que ela precise recalcular seus
+dados internos mais frequentemente que a Rubro-negra, que acabou "ganhando" a disputa de inserção.
+
+\subsection{Remoção de Chaves}
+\begin{figure}[H]
+\centering
+\fbox{\includegraphics[width=0.8\textwidth]{../scripts/grafico_remocao.png}}
+\caption{Gráfico }
+\end{figure}{H}
+Aqui notamos algumas coisas interessantes. A árvore B "disparou" como a pior de todas.
+Isso ocorre porque ela armazena no máximo 2 chaves por nó, e por ter nós pequenos, ela
+acaba tendo uma alta taxa de underflow, além de ter o overhead da função trata\_subfluxo.
+
+Também notamos que a AVL fica em segundo lugar. Isso vem de um motivo similar ao mencionado
+na inserção; a árvore AVL é mais estrita, e acaba realizando mais comparações em suas operações.
+Além disso, podemos ver que as árvores B5 e B10 melhoraram, pois, nesse caso, seus nós
+com muitas chaves são uma vantagem, já que  a remoção de um elemento raramente causa um subfluxo.
+Outro fator é de que o algoritmo quase não precisa recorrer a fusões de chaves entre irmão, "desviando"
+do custo da função trata\_subfluxo.
+
+A Observação mais diferente e inesperada é a da árvore rubro-negra ser considerada a
+mais eficiente para remoção. Compreendemos isso como uma consequência de sua implementação,
+onde a função remover faz apenas um \verb|while| simples até encontrar o nó desejado, e
+de que o balanceamento é realizado basicamente apenas pelas cores dos nós, que não
+foram contabilizados. Como a rubro-negra não faz comparações entre valores numéricos, ela
+acabou sendo a mais eficiente para fins do nosso teste.
 \end{document}
