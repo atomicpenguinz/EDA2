@@ -151,6 +151,12 @@ Quando cada nó armazena explicitamente sua altura, o cálculo do fator de balan
 uma operação de esforço constante $(O(1))$.
 
 \subsection{Árvore Rubro-negra}
+A árvore Rubro-Negra foi implementada garantindo as propriedades fundamentais de balanceamento através da atribuição de cores(vermelho ou preto) a cada nó. Diferente da AVL, a Rubro-Negra assegura que o caminho mais longo da raiz até uma folha não seja maior que o dobro do caminho mais curto, mantendo a altura da árvore em $O(logn)$.
+
+A estrutura mantém a consistência da árvore através de regras rigorsoas: Todo nó é ou vermelho ou preto, a raíz é sempre preta, e não podem existir dois nós vermelhos adjacentes. Sempre que uma inserção ou remoção viola essas propriedades, a árvore utiliza um conjunto de rotações e, crucialmente, a alteração das cores dos nós para restaurar o equilíbrio.
+
+Esse armazenamento da cor em cada nó é o detalhe que confere a eficiência desta estrutura. Enquanto a AVL prioriza uma busca mais rápida, a Rubro-Negra é otimizada para cenários de alta rotatividade de dados. Como o rebalanceamento é feito através da mudança das cores e rotações são menos fequentes que na AVL, a árvore tende a apresentar um desempenho superior em sistemas onde inserções e remoções são tão frequentes quanto buscas.
+
 
 \subsection{Árvores B}
 
