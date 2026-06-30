@@ -33,11 +33,12 @@ void rodaDireita(No* aux){
     if(!aux->pai){
         raiz = esq;
     }
-    else if(aux == aux->pai->esquerda){
-        aux->pai->esquerda = esq;
-    }
     else{
-        aux->pai->direita = esq;
+        esforco++;
+        if(aux == aux->pai->esquerda)
+            aux->pai->esquerda = esq;
+        else 
+            aux->pai->direita = esq;
     }
     esq->direita = aux;
     aux->pai = esq;
@@ -54,11 +55,12 @@ void rodaEsquerda(No* aux){
     if(!aux->pai){
         raiz = dir;
     }
-    else if(aux == aux->pai->esquerda){
-        aux->pai->esquerda = dir;
-    }
-    else{
-        aux->pai->direita = dir;
+    else {
+        esforco++;
+        if(aux == aux->pai->esquerda)
+            aux->pai->esquerda = dir;
+        else
+            aux->pai->direita = dir;
     }
     dir->esquerda = aux;
     aux->pai = dir;
@@ -69,6 +71,7 @@ void balancearAdd(No* nodo){
     No* voNodo = NULL;
 
     while((nodo != raiz) && (nodo->cor != 0) && (nodo->pai->cor == 1)){
+        esforco++;
         paiNodo = nodo->pai;
         voNodo = nodo->pai->pai;
 
